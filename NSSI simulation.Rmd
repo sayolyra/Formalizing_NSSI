@@ -1,0 +1,169 @@
+---
+title: "thesis_simulation"
+author: "Sayo Stefflbauer"
+date: "2025-06-18"
+output: html_document
+---
+
+
+```{r}
+########################### INSTALLING TOOLS:
+install.packages("simdata")
+install.packages("devtools")
+
+library(simdata)
+library(devtools)
+```
+
+
+```{r setup, include=FALSE}
+########################### FUNCTION INPUT:
+
+# person inputs: integer vector indicating the time interval, stepsize (<=1), parameter values for the model, initial values for state variables, and any interventions to occur during the simulation. Finally, you set the progress bar logical values. 
+
+
+simNSSI <- function(time = NULL, # time interval
+                    stepsize = NULL, # how often changes occur per 1 time unit (minute)
+                    parameters = NULL, # variables with fixed values
+                    initial = NULL # variables with values that change over time
+                    )  
+  
+{
+########################### SET-UP ###################################
+  
+#### Step 0: Overwrite default with initial parameters values ---------------
+
+  # Overwrite default parameters, if specified 
+  PS <- pars_default
+
+  # Overwrite default starting values, if specified 
+  INI <- initial_default
+  
+  # Handle user-supplied or default parameters
+  PS <- if (!is.null(parameters)) parameters else pars_default
+  INI <- if (!is.null(initial)) initial else initial_default
+  
+  # Specify simulation parameters, if not previously specified
+  if (is.null(stepsize)) {
+    stepsize <- sim_default$stepsize
+  } # end: if
+  
+  if (is.null(time)) {
+   time <- time_default
+  } # end: if
+
+#### Step 1: Import Time Scale and Default Parameters ---------------
+
+  # Range of time steps, 1:number of specified iterations
+  range_time <- range(time) 
+
+
+#### Step 2: Specify state variables' initial starting values ---------------
+  
+  A  <- INI$A # HANE 
+  U <- INI$U # Urge
+  P <- INI$P # pain
+  p_NSSI <- INI$p_NSSI # Probability of engaging in NSSI
+  NSSI <- INI$NSSI
+  
+
+#### Step 3: Specify auxillary variables  ---------------
+  
+  S <- rep(0,120) # 2-hour stress vector
+  S[20] = 1 # when in time frame stressor occurs
+
+  NSSI <- 0 # set NSSI to 0 when time begins
+
+  timepoints <- seq(time[[1]], max(unlist(time)), by = stepsize)
+  
+  # Save user-inputted values
+  outmat <- matrix(NA, 
+                   nrow = length(timepoints), 
+                   ncol = 5, 
+                   dimnames = list(NULL, c("A", "U", "P", "p_NSSI", "NSSI")) )
+  outmat[1, ] <- c(A, U, P, p_NSSI, NSSI)
+
+  # Track Time with a time-tracker
+  obs_tracker <- 2 # the first observation has already been taken, so next save point is the 2nd
+  
+
+########################### SIMULATION ########################### 
+  
+#### Step 1: 'For Loop' that carries out simulation  ---------------
+  
+  # for loop (fast loop)
+  for (time_tracker in 2:length(timepoints)) {
+
+    # Arousal
+    Anew <- A + dA_dt(A = A,
+                      S = S[time_tracker-1],
+                      P = P,
+                      k_D = pars_default[["A"]][["k_D"]],
+                      r_A = pars_default[["A"]][["r_A"]],
+                      r_AP = pars_default[["A"]][["r_AP"]]) * stepsize
+
+    # Urge
+    Unew <- U + dU_dt(U = U,
+                      A = A,
+                      k_SS = pars_default[["U"]][["k_SS"]],
+                      r_U = pars_default[["U"]][["r_U"]],
+                      T_U = pars_default[["U"]][["T_U"]]) * stepsize
+
+    # NSSI 
+    # to make probability smaller if you have more timesteps * stepsize
+    NSSInew <- rbinom(1, 1, prob = p_NSSI*stepsize) * stepsize # scales the effect NSSI to the stepsize
+    
+    # Pain
+    Pnew <- P + dP_dt(P = P,
+                      NSSI = NSSI,
+                      r_P = pars_default[["U"]][["r_P"]],
+                      k_PS = pars_default[["P"]][["k_PS"]]) * stepsize
+    
+    # Probability of NSSI
+    p_NSSInew <- p_NSSI + dp_NSSI_dt(p_NSSI = p_NSSI,
+                                     U = U,
+                                     NSSI = NSSI,
+                                     k_I = pars_default[["p_NSSI"]][["k_I"]],
+                                     T_N = pars_default[["p_NSSI"]][["T_N"]]) * stepsize
+
+    # Overwrite current values
+    A <- Anew
+    U <- Unew
+    P <- Pnew
+    p_NSSI<- p_NSSInew
+    NSSI <- NSSInew
+
+    # Save results
+    outmat[time_tracker, ] <- c(A, U, P, p_NSSI, NSSI)
+    
+  } # End: for loop over time steps
+
+
+#### Step 2: Specify Function's Output ---------
+
+  outmat <- as.data.frame(outmat)
+
+  outlist <- list("outmat" = outmat,
+                  "input" = list("parameters" = PS, 
+                                 "initial" = INI))
+  return(outlist)
+
+} # End of Function
+```
+
+```{r}
+# Test function
+test_results <- simNSSI(time = 1:5, 
+                        stepsize = 1, 
+                        parameters = pars_default, 
+                        initial = initial_default)
+
+  print(c(A, U, P, p_NSSI))
+  time_tracker
+  
+  library(dplyr)
+t_results <- test_results %>% rbind(time, data.frame(A, U, P, p_NSSI))
+  print(dim(outmat))  # should return something like c(120, 5)
+
+```
+

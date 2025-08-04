@@ -1,0 +1,67 @@
+---
+title: "Untitled"
+author: "Sayo Stefflbauer"
+date: "2025-06-18"
+output: html_document
+---
+This file outlines the differential equations to formalize the phenomenon of NSSI.
+
+```{r}
+# -----------------------------------------
+# ---- High Arousal Negative Emotions -----
+# -----------------------------------------
+
+dA_dt <- function(A,
+                  S,
+                  k_D,
+                  P,
+                  r_A,
+                  r_AP) {
+  S*k_D*A - r_A*A - r_AP*P
+}
+
+# HANE (A) increases only if a distressing event (S) occurs, at a rate that depends on person's level of distress intolerance (D). HANE naturally decreases over time at rate r_A.
+# S*D*A: stress is more HANE inducing when HANE is already high!
+# r_AP how relieving the pain is to HANE
+
+# -----------------------------------------
+# -------------- NSSI Urge ----------------
+# -----------------------------------------
+
+dU_dt <- function(U,
+                  T_U,
+                  A,
+                  k_SS,
+                  r_U) {
+ 1/(1 + exp(-k_SS*(A - T_U))) - r_U*U
+}
+
+# If HANE (A) has passed urge threshold (T_U), urge (U) changes based on level of HANE and sensory seeking. Urge naturally decreases exponentially at rate r_U.
+
+# -----------------------------------------
+# --------------- Pain --------------------
+# -----------------------------------------
+
+dP_dt <- function(P,
+                  k_PS,
+                  r_P,
+                  NSSI) {
+  k_PS*NSSI - r_P*P
+}
+
+# Pain increases only if NSSI occurs, at a rate that depends on a person's level of pain sensitivity and the current level of pain. Pain naturally decays at rate r_P.
+
+# -----------------------------------------
+# --------------- P(NSSI) -----------------
+# -----------------------------------------
+
+dp_NSSI_dt <- function(p_NSSI,
+                       U,
+                       NSSI,
+                       k_I,
+                       T_N) {
+  (1/(1 + exp(-k_I * (U - T_N)))) - p_NSSI * NSSI # to keep probability non-negative
+}
+
+# If urge has passed NSSI threshold (T_N), p_NSSI changes depending on person's impulsivity.  Probability of NSSI decreases naturally depending on whether or not NSSI has occurred.
+```
