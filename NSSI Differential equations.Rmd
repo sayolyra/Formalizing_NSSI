@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "NSSI differential equations"
 author: "Sayo Stefflbauer"
 date: "2025-06-18"
 output: html_document
