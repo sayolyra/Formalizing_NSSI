@@ -1,62 +1,40 @@
-This file outlines the differential equations to formalize the phenomenon of NSSI.
+---
+title: "Defaul Values"
+output: html_notebook
+---
 
 ```{r}
-# -----------------------------------------
-# ---- High Arousal Negative Emotions -----
-# -----------------------------------------
-
-dA_dt <- function(A,
-                  E,
-                  k_SSA,
-                  P,
-                  r_A,
-                  r_AP) {
-  #E*k_SSA - r_A*A - r_AP*P*A
-  E*k_SSA*A - r_A*A - r_AP*P*A
-}
-
-# HANE (A) increases only if a distressing event (E) occurs, at a rate that depends on person's level of stress susceptibility (k_SSA). HANE naturally decreases over time at rate r_A.
-# E*S*A: stress is more HANE inducing when HANE is already high!
-# r_AP: how relieving the pain is to HANE
+# August, 2025
 
 # -----------------------------------------
-# -------------- NSSI Urge ----------------
+# -------- Default: Parameters ------------
 # -----------------------------------------
 
-dU_dt <- function(U, 
-                  A, 
-                  k_SSU, 
-                  m_U, 
-                  r_U) {
-  (1 / (1 + exp(-k_SSU*(A - m_U)))) - U*r_U
-}
-# If HANE (A) has passed urge threshold (m_U), urge (U) changes based on level of HANE and stress susceptibility (k_SSU). Urge naturally decreases exponentially at rate r_U.
+pars_default <- list("A" = list("k_SSA" = 0.035,
+                                "r_A"= 0.0005,
+                                "r_AP" = 0.3),
+                     
+                     "U" = list("m_U" = 2,
+                                "k_SSU" = 3,
+                                "r_U" = 0.05),
+
+                     "P" = list("k_PS" = 25,
+                                "r_P" = 0.15),
+
+                     "PN" = list("k_I" = 9,
+                                 "m_N" = 0.8,
+                                 "r_PN" = 0.8)
+)
 
 # -----------------------------------------
-# --------------- Pain --------------------
+# -------- Default: Initial Values --------
 # -----------------------------------------
 
-dP_dt <- function(P,
-                  k_PS,
-                  r_P,
-                  N) {
-  k_PS*N - r_P*P
-}
-
-# Pain (P) increases only if NSSI (N) occurs, at a rate that depends on a person's level of pain sensitivity (PS) and the current level of pain (P). Pain naturally decays at rate r_P.
-
-# -----------------------------------------
-# --------------- P(NSSI) -----------------
-# -----------------------------------------
-
-dPN_dt <- function(PN,
-                   U,
-                   k_I,
-                   m_N,
-                   r_PN) {
-  (1/(1 + exp(-k_I * (U - m_N)))) - r_PN*PN
-}
-
-# If urge (U) has passed NSSI threshold (m_N), probability of NSSI (PN) changes depending on person's impulsivity (k_I). PN  naturally decreases depending on whether or not NSSI has happened (r_PN). r_PN controls how quickly PN decays after NSSI occurs.
+initial_default <- list("A" = 0.2,
+                      "U" = 0.15,
+                      "P" = 0,
+                      "PN" = 0,
+                      "N" = 0)
 ```
+
 
