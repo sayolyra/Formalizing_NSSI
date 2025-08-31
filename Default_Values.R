@@ -1,0 +1,31 @@
+# This file contains starting parameter and state values for the simulation.
+
+# -----------------------------------------
+# -------- Default: Parameters ------------
+# -----------------------------------------
+
+pars_default <- list("A" = list("k_SSA" = 0.035,
+                                "r_A"= 0.0005,
+                                "r_AP" = 0.3),
+                     
+                     "U" = list("m_U" = 2,
+                                "k_SSU" = 3,
+                                "r_U" = 0.05),
+
+                     "P" = list("k_PS" = 25,
+                                "r_P" = 0.15),
+
+                     "PN" = list("k_I" = 9,
+                                 "m_N" = 0.8,
+                                 "r_PN" = 0.8)
+)
+
+# -----------------------------------------
+# -------- Default: Initial Values --------
+# -----------------------------------------
+
+initial_default <- list("A" = 0.2,
+                      "U" = 0.15,
+                      "P" = 0,
+                      "PN" = 0,
+                      "N" = 0)
