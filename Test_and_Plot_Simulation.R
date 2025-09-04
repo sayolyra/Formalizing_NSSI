@@ -3,7 +3,7 @@
 ########################### Test simulation
 test_results <- simNSSI(
   time_vec = 1:900,
-  # 30 mins
+  # 15 mins
   stepsize = 0.01,
   PS = pars_default,
   INI = initial_default,
